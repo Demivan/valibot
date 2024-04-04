@@ -20,12 +20,17 @@ export interface Brand<TName extends BrandName> {
 /**
  * Brand action type.
  */
-export interface BrandAction<TInput, TName extends BrandName>
-  extends BaseTransformation<TInput, TInput & Brand<TName>, never> {
+export interface BrandAction<TInput, TBrand>
+  extends BaseTransformation<TInput, TInput & TBrand, never> {
   /**
    * The action type.
    */
   readonly type: 'brand';
+}
+
+export interface BrandMarker<TBrand> {
+  type: 'brand',
+  brandType?: TBrand
 }
 
 /**
@@ -35,16 +40,9 @@ export interface BrandAction<TInput, TName extends BrandName>
  *
  * @returns A brand action.
  */
-export function brand<TInput, TName extends BrandName>(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  name: TName
-): BrandAction<TInput, TName> {
+export function brand<TBrand>(
+): BrandMarker<TBrand> {
   return {
-    kind: 'transformation',
     type: 'brand',
-    async: false,
-    _run(dataset) {
-      return dataset as TypedDataset<TInput & Brand<TName>, never>;
-    },
   };
 }

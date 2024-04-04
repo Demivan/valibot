@@ -1,3 +1,4 @@
+import { BrandAction, BrandMarker } from '../../actions/index.ts';
 import type {
   BaseIssue,
   BaseSchema,
@@ -50,6 +51,16 @@ export type SchemaWithPipe<
     readonly issue: InferIssue<TPipe[number]>;
   };
 };
+
+// Brand variant
+export function pipe<
+  const TSchema extends BaseSchema<unknown, unknown, BaseIssue<unknown>>,
+  const TBrand,
+  const TItem1 extends BrandMarker<TBrand>,
+>(
+  schema: TSchema,
+  item1: TItem1 | BrandMarker<TBrand>
+): SchemaWithPipe<[TSchema, BrandAction<InferOutput<TSchema>, TBrand>]>;
 
 /**
  * Adds a pipeline to a schema, that can validate and transform its input.
