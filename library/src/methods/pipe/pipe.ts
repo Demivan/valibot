@@ -11,6 +11,7 @@ import type {
   PipeAction,
   PipeItem,
 } from '../../types/index.ts';
+import { maybeAsync } from './common.ts';
 
 /**
  * Schema with pipe type.
@@ -596,12 +597,13 @@ export function pipe<
 >(...pipe: [TSchema, ...TItems]): SchemaWithPipe<[TSchema, ...TItems]> {
   return {
     ...pipe[0],
+    async: pipe[0].async || pipe.slice(1).some((item) => item.async),
     pipe,
-    _run(dataset, config) {
+    _run: maybeAsync(function* (dataset, config) {
       // Run actions of pipeline
       for (let index = 0; index < pipe.length; index++) {
         // @ts-expect-error
-        dataset = pipe[index]._run(dataset, config);
+        dataset = yield pipe[index]._run(dataset, config);
 
         // If necessary, skip pipe or abort early
         const nextAction = pipe[index + 1];
@@ -621,6 +623,6 @@ export function pipe<
 
       // Return output dataset
       return dataset;
-    },
+    }),
   };
 }
