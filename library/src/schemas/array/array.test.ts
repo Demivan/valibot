@@ -15,7 +15,6 @@ describe('array', () => {
       reference: array,
       expects: 'Array',
       item,
-      async: false,
       _run: expect.any(Function),
     };
 
@@ -186,7 +185,7 @@ describe('array', () => {
         )
       ).toStrictEqual({
         typed: false,
-        value: ['foo'],
+        value: [],
         issues: [{ ...stringIssue1, abortEarly: true }],
       } satisfies UntypedDataset<InferIssue<typeof schema>>);
     });

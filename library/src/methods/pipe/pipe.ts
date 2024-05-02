@@ -597,7 +597,6 @@ export function pipe<
 >(...pipe: [TSchema, ...TItems]): SchemaWithPipe<[TSchema, ...TItems]> {
   return {
     ...pipe[0],
-    async: pipe[0].async || pipe.slice(1).some((item) => item.async),
     pipe,
     _run(dataset, config) {
       return maybeAsync(this, function* () {

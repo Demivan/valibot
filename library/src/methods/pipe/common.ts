@@ -10,7 +10,7 @@ type MaybeAwait<P> = P extends Promise<infer T> ? T : P;
  */
 export function maybeAsync<TThis, TYield, TReturn>(
   _this: TThis,
-  body: () => Generator<TYield, TReturn, MaybeAwait<TYield>>
+  body: (this: TThis) => Generator<TYield, TReturn, MaybeAwait<TYield>>
 ): Promise<TReturn> | TReturn {
   const gen = body.call(_this);
   function run(...args: [] | [TYield extends Promise<infer P> ? P : TYield]): Promise<TReturn> | TReturn {
@@ -24,5 +24,9 @@ export function maybeAsync<TThis, TYield, TReturn>(
     }
     return result.value;
   }
-  return run();
+  try {
+    return run();
+  } catch (err) {
+    throw err
+  }
 }

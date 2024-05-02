@@ -1,9 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import type { InferIssue, UntypedDataset } from '../../types/index.ts';
+import type { InferIssue, TypedDataset, UntypedDataset } from '../../types/index.ts';
 import { expectNoSchemaIssue, expectSchemaIssue } from '../../vitest/index.ts';
 import { string, type StringIssue } from '../string/index.ts';
-import { arrayAsync, type ArraySchemaAsync } from './arrayAsync.ts';
+import { array as arrayAsync, type ArraySchemaAsync } from './array.ts';
 import type { ArrayIssue } from './types.ts';
+import { transformAsync } from '../../actions/index.ts';
+import { pipe } from '../../methods/index.ts';
 
 describe('array', () => {
   describe('should return schema array', () => {
@@ -15,7 +17,6 @@ describe('array', () => {
       reference: arrayAsync,
       expects: 'Array',
       item: { ...string(), _run: expect.any(Function) },
-      async: true,
       _run: expect.any(Function),
     };
 
@@ -189,10 +190,31 @@ describe('array', () => {
         )
       ).toStrictEqual({
         typed: false,
-        value: ['foo'],
+        value: [],
         issues: [{ ...stringIssue1, abortEarly: true }],
       } satisfies UntypedDataset<InferIssue<typeof schema>>);
     });
+
+    test('is executed in parralel', async () => {
+      const schema = arrayAsync(pipe(string(), transformAsync(async (str) => {
+        const delay = Number.parseInt(str)
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, delay)
+        })
+
+        return delay
+      })));
+      expect(
+        await schema._run(
+          { typed: true, value: ['150', '150'] },
+          { abortEarly: true }
+        )
+      ).toStrictEqual({
+        typed: true,
+        value: [150, 150],
+      });
+    }, { timeout: 200 });
 
     test('for wrong nested items', async () => {
       const nestedSchema = arrayAsync(schema);
